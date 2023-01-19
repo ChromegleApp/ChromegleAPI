@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
 
 
 router.get("/owner/gif", async (req, res) => {
-    return res.sendFile(path.join(__dirname, "../", "/resources/owner_img"));
+    return res.sendFile(path.join(__dirname, "../", "/resources/owner.gif"));
 });
 
 module.exports = router;
