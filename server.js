@@ -3,15 +3,15 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const PORT = process.env.PORT || "3000";
-const webcastRoute = require("./routes/geolocate");
-const Logger = require("./modules/logger")
+const tipRoute = require("./routes/tips");
+const geoRoute = require("./routes/geolocate");
+const Logger = require("./modules/logger");
 
 // Use X-Forwarded-For IP for rate limiting
 app.enable("trust proxy");
 app.use(require("cors")());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-const swagger = require("swagger-ui-express");
 
 /**
  * CORS Settings
@@ -38,6 +38,7 @@ app.use((req, res, next) => {
 });
 
 
-app.use("/geolocate", webcastRoute);
+app.use("/geolocate", geoRoute);
+app.use("/tips", tipRoute);
 app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 server.listen(PORT, () => Logger.INFO(`Listening on port ${PORT} for connections!`));
