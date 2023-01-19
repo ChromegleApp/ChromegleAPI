@@ -2,8 +2,7 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
-const { Server } = require("socket.io");
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || "3000";
 const webcastRoute = require("./routes/geolocate");
 const Logger = require("./modules/logger")
 
@@ -29,15 +28,16 @@ app.options("*", (req, res) => {
  */
 app.use((req, res, next) => {
 
-    res.on("finish", () => {
-        Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.ip.replaceAll("::ffff:", ""), req.originalUrl)
-    });
+    res.on(
+        "finish",
+        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.ip.replaceAll("::ffff:", ""), req.originalUrl)
+    );
 
     next();
+
 });
 
 
 app.use("/geolocate", webcastRoute);
-app.all('*', (req, res) => { res.status(404).json({ error: "Invalid Route" }); });
-
+app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 server.listen(PORT, () => Logger.INFO(`Listening on port ${PORT} for connections!`));

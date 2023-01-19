@@ -1,11 +1,8 @@
 const { rateLimit } = require('express-rate-limit');
 const express = require("express");
 const router = express.Router();
-const EventEmitter = require("events");
-var request = require('request');
-let net = require('net');
-
-router.ioCallbacks = new EventEmitter();
+const net = require('net');
+const axios = require('axios');
 
 const rateLimitMinute = rateLimit({
     windowMs: 60 * 1000,
@@ -13,21 +10,43 @@ const rateLimitMinute = rateLimit({
 });
 
 
+function validResponse(data) {
+    try {
+        let keys = Object.keys(data);
+        return keys.includes('ip') && keys.includes('asn');
+    } catch (ex) {
+        return false;
+    }
+}
+
+
 /**
  * Sign URL endpoint
  */
 router.get("/", rateLimitMinute, async (req, res) => {
 
-    if (!net.isIP(req.query.address)) {
+    // Check if a valid IP is provided
+    if (!net.isIP(req?.query?.address)) {
         res.status(400).send({ error: "Invalid or missing IP Address" });
         return;
     }
 
     try {
-        request(`https://get.geojs.io/v1/ip/geo/${req.query.address}.json`).pipe(res);
-    } catch (err) {
-        res.status(500).send({ error: "Timeout" });
+        // Make request
+        const response = await axios.get(`https://get.geojs.io/v1/ip/geo/${req?.query?.address}.json`);
+
+        // Valid Reply
+        if (validResponse(response?.data)) {
+            return res.json(response.data);
+        }
+
+        // Invalid response
+        res.status(500).send({ error: "Failed to geo-locate due to an invalid response payload" });
+    } catch (error) {
+        // Request error
+        res.status(500).send({ error: "Failed to geo-locate due to a caught exception" });
     }
+
 });
 
 
