@@ -23,25 +23,17 @@ function validResponse(data) {
 async function setChromegleUser(req) {
 
     // Check if declared as a chromegler
-    if (!req?.query?.["chromegler"]) {
-        console.log('not a chromegler');
+    if (!(req.query?.chromegler === "true")) {
         return;
     }
 
     // Set chromegle status
-    try {
-        await req.app.redis.set(`chromegle:users:${req.ip}`, "", {'EX': config.expire_chromegler});
-    } catch (ex) {
-    }
+    req.app.usercache.set(`chromegle:users:${req.ip}`, "", config.expire_chromegler);
 
 }
 
-async function checkIfChromegler(req, data) {
-    try {
-        return (await req.app.redis.get(`chromegle:users:${data.ip}`)) !== null;
-    } catch (ex) {
-
-    }
+function checkIfChromegler(req, data) {
+    return req.app.usercache.has(`chromegle:users:${data.ip}`);
 }
 
 
@@ -65,7 +57,7 @@ router.get("/", rateLimitMinute, async (req, res) => {
 
         // Valid Reply
         if (validResponse(response?.data)) {
-            response.data["chromegler"] = await checkIfChromegler(req, response.data);
+            response.data["chromegler"] = checkIfChromegler(req, response.data);
             response.data["owner"] = response.data?.ip === config.owner_ip;
             return res.json(response.data);
         }

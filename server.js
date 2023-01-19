@@ -5,23 +5,16 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || "3000";
 const tipRoute = require("./routes/tips");
 const geoRoute = require("./routes/geolocate");
+const usersRoute = require("./routes/users");
 const Logger = require("./modules/logger");
-const config = require("./resources/config.json");
-const redis = require("redis");
+const NodeCache = require("node-cache");
 
 // Use X-Forwarded-For IP for rate limiting
 app.enable("trust proxy");
 app.use(require("cors")());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.redis = redis.createClient({"url": `redis://default:${config.redis.password}@${config.redis.host}:${config.redis.port}`});
-
-/**
- * Connect to Redis
- */
-app.redis.connect().then(() => {
-    Logger.INFO("Redis successfully connected");
-})
+app.usercache = new NodeCache({stdTTL: 300, checkperiod: 30});
 
 /**
  * CORS Settings
@@ -50,5 +43,6 @@ app.use((req, res, next) => {
 
 app.use("/geolocate", geoRoute);
 app.use("/tips", tipRoute);
+app.use("/users", usersRoute);
 app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 server.listen(PORT, () => Logger.INFO(`Listening on port ${PORT} for connections!`));
