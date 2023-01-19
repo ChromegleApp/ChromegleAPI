@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const net = require('net');
 const axios = require('axios');
+const config = require("../resources/config.json");
 
 const rateLimitMinute = rateLimit({
     windowMs: 60 * 1000,
@@ -19,11 +20,38 @@ function validResponse(data) {
     }
 }
 
+async function setChromegleUser(req) {
+
+    // Check if declared as a chromegler
+    if (!req?.query?.["chromegler"]) {
+        console.log('not a chromegler');
+        return;
+    }
+
+    // Set chromegle status
+    try {
+        await req.app.redis.set(`chromegle:users:${req.ip}`, "", {'EX': config.expire_chromegler});
+    } catch (ex) {
+    }
+
+}
+
+async function checkIfChromegler(req, data) {
+    try {
+        return (await req.app.redis.get(`chromegle:users:${data.ip}`)) !== null;
+    } catch (ex) {
+
+    }
+}
+
 
 /**
  * Sign URL endpoint
  */
 router.get("/", rateLimitMinute, async (req, res) => {
+
+    // Make them a Chromegle user
+    await setChromegleUser(req);
 
     // Check if a valid IP is provided
     if (!net.isIP(req?.query?.address)) {
@@ -37,6 +65,8 @@ router.get("/", rateLimitMinute, async (req, res) => {
 
         // Valid Reply
         if (validResponse(response?.data)) {
+            response.data["chromegler"] = await checkIfChromegler(req, response.data);
+            response.data["owner"] = response.data?.ip === config.owner_ip;
             return res.json(response.data);
         }
 

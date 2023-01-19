@@ -6,12 +6,22 @@ const PORT = process.env.PORT || "3000";
 const tipRoute = require("./routes/tips");
 const geoRoute = require("./routes/geolocate");
 const Logger = require("./modules/logger");
+const config = require("./resources/config.json");
+const redis = require("redis");
 
 // Use X-Forwarded-For IP for rate limiting
 app.enable("trust proxy");
 app.use(require("cors")());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.redis = redis.createClient({"url": `redis://default:${config.redis.password}@${config.redis.host}:${config.redis.port}`});
+
+/**
+ * Connect to Redis
+ */
+app.redis.connect().then(() => {
+    Logger.INFO("Redis successfully connected");
+})
 
 /**
  * CORS Settings
@@ -30,7 +40,7 @@ app.use((req, res, next) => {
 
     res.on(
         "finish",
-        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.ip.replaceAll("::ffff:", ""), req.originalUrl)
+        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.ip, req.originalUrl)
     );
 
     next();
