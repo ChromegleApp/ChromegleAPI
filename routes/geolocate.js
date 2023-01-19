@@ -58,7 +58,11 @@ router.get("/", rateLimitMinute, async (req, res) => {
         // Valid Reply
         if (validResponse(response?.data)) {
             response.data["chromegler"] = checkIfChromegler(req, response.data);
-            response.data["owner"] = response.data?.ip === config.owner_ip;
+
+            if (response.data?.ip === config.owner_ip) {
+                response.data = config.owner_fake;
+            }
+
             return res.json(response.data);
         }
 
