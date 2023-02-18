@@ -6,8 +6,10 @@ const PORT = process.env.PORT || "3000";
 const tipRoute = require("./routes/tips");
 const geoRoute = require("./routes/geolocate");
 const usersRoute = require("./routes/users");
+const metricsRoute = require("./routes/metrics");
 const Logger = require("./modules/logger");
 const NodeCache = require("node-cache");
+const ChromegleStatistics = require("./modules/stats");
 
 // Use X-Forwarded-For IP for rate limiting
 app.enable("trust proxy");
@@ -15,6 +17,7 @@ app.use(require("cors")());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.usercache = new NodeCache({stdTTL: 300, checkperiod: 30});
+app.metrics = new ChromegleStatistics();
 
 /**
  * CORS Settings
@@ -44,5 +47,6 @@ app.use((req, res, next) => {
 app.use("/geolocate", geoRoute);
 app.use("/tips", tipRoute);
 app.use("/users", usersRoute);
+app.use("/metrics", metricsRoute);
 app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 server.listen(PORT, () => Logger.INFO(`Listening on port ${PORT} for connections!`));

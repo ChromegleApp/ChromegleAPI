@@ -36,6 +36,31 @@ function checkIfChromegler(req, data) {
     return req.app.usercache.has(`chromegle:users:${data.ip}`);
 }
 
+/**
+ * Log the country of each geolocation IP requested. For specific countries,
+ * log the *region* in the country the request originates from.
+ *
+ * It's important to not log the region for every country due to high cardinality.
+ * Explanation: https://www.robustperception.io/cardinality-is-key/
+ */
+function registerPrometheusMetrics(req, payload) {
+
+    // Get country & region
+    let country = payload?.["country_code"] || null;
+    let region = payload?.["region"] || null;
+
+    let labelConfig = {"country": country, "region": "N/A"}
+
+    // Only care about regions within these countries
+    if (["US", "GB", "CA"].includes(country) && region != null) {
+        labelConfig["region"] = region;
+    }
+
+    // Register metrics
+    req.app.metrics.insertGeolocationRequest(labelConfig);
+
+}
+
 
 /**
  * Sign URL endpoint
@@ -63,6 +88,8 @@ router.get("/", rateLimitMinute, async (req, res) => {
                 response.data = config.owner_fake;
             }
 
+
+            registerPrometheusMetrics(req, response.data);
             return res.json(response.data);
         }
 
