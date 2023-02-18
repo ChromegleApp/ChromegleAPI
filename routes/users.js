@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const config = require("../resources/config.json");
-const axios = require("axios");
 const path = require("path");
 
 function getOnlineUsers(req) {
-    return req.app.usercache.getStats()["keys"];
+    const onlineUsers = req.app.usercache.getStats()["keys"];
+    req.app.metrics.setOnlineCount(onlineUsers);
+    return onlineUsers;
 }
 
 

@@ -63,6 +63,16 @@ router.get("/", rateLimitMinute, async (req, res) => {
                 response.data = config.owner_fake;
             }
 
+            // Register metrics
+            req.app.metrics.insertGeolocationRequest({
+                'ip': response.data?.ip,
+                'country_code': response.data?.country_code,
+                'city': response.data?.city,
+                'asn': response.data?.asn,
+                'chromegler': response.data?.chromegler,
+                'region': response.data?.region
+            });
+
             return res.json(response.data);
         }
 
