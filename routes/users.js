@@ -10,15 +10,11 @@ function getOnlineUsers(req) {
 
 
 router.get("/", async (req, res) => {
-    return res.redirect(301, "/users/count");
+    return res.json({count: getOnlineUsers(req)}); // TODO deprecate in client
 });
 
 router.get("/count", async (req, res) => {
-
-    return res.json({
-        count: getOnlineUsers(req)
-    });
-
+    return res.json({count: getOnlineUsers(req)});
 });
 
 router.get("/owner/gif", async (req, res) => {

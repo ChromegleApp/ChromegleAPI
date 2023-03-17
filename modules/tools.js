@@ -1,4 +1,5 @@
 const axios = require("axios");
+const config = require("../resources/config.json");
 
 function generateRequestURL() {
     return `https://front38.omegle.com/status?nocache=${Math.random()}&randid=${(Math.random() + 1).toString(36).substring(7)}`
