@@ -3,11 +3,11 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const PORT = process.env.PORT || "3000";
-const tipRoute = require("./routes/tips");
-const geoRoute = require("./routes/geolocate");
 const usersRoute = require("./routes/users");
-const metricsRoute = require("./routes/metrics");
+const baseRoute = require("./routes/base");
+const omegleRoute = require("./routes/omegle");
 const Logger = require("./modules/logger");
+const tools = require("./modules/tools");
 const NodeCache = require("node-cache");
 const ChromegleStatistics = require("./modules/stats");
 
@@ -17,6 +17,7 @@ app.use(require("cors")());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.usercache = new NodeCache({stdTTL: 300, checkperiod: 30});
+app.gencache = new NodeCache({stdTTL: 300, checkperiod: 30});
 app.metrics = new ChromegleStatistics();
 
 /**
@@ -44,9 +45,16 @@ app.use((req, res, next) => {
 });
 
 
-app.use("/geolocate", geoRoute);
-app.use("/tips", tipRoute);
+app.use("/", baseRoute);
 app.use("/users", usersRoute);
-app.use("/metrics", metricsRoute);
+app.use("/omegle", omegleRoute);
 app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
-server.listen(PORT, () => Logger.INFO(`Listening on port ${PORT} for connections!`));
+
+server.listen(PORT, async () => {
+    Logger.INFO(`Listening on port ${PORT} for connections!`);
+
+    // Register Prometheus Omegle Metrics
+    setInterval(async () => await tools.registerPrometheusOmegleMetrics(app), 60 * 1000);
+    await tools.registerPrometheusOmegleMetrics(app);
+
+});

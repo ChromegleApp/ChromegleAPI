@@ -10,13 +10,16 @@ function getOnlineUsers(req) {
 
 
 router.get("/", async (req, res) => {
+    return res.redirect(301, "/users/count");
+});
+
+router.get("/count", async (req, res) => {
 
     return res.json({
         count: getOnlineUsers(req)
     });
 
 });
-
 
 router.get("/owner/gif", async (req, res) => {
     return res.sendFile(path.join(__dirname, "../", "/resources/owner.gif"));

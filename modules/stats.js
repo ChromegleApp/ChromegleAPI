@@ -21,6 +21,14 @@ class ChromegleStatistics {
                     labelNames: ['country', 'region']
                 }
             )
+        },
+        "omegle_count": {
+            "object": new Gauge(
+                {
+                    name: `${this.prefix}_omegle_count`,
+                    help: "Currently online count of Omegle users"
+                }
+            )
         }
 
     }
@@ -40,6 +48,10 @@ class ChromegleStatistics {
 
     setOnlineCount(count) {
         this.metrics?.online_count?.object.set(count);
+    }
+
+    setOmegleCount(count) {
+        this.metrics?.omegle_count?.object.set(count);
     }
 
     insertGeolocationRequest(labelData) {
