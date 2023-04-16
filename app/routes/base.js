@@ -21,7 +21,8 @@ router.get("/tips", async (req, res) => {
 
 const geoRateLimitMinute = rateLimit({
     windowMs: 60 * 1000,
-    max: 60
+    max: 60,
+    keyGenerator: (request, _) => request.headers["x-forwarded-for"]
 });
 
 
@@ -44,10 +45,9 @@ router.get("/geolocate", geoRateLimitMinute, async (req, res) => {
         if (tools.validGeoResponse(response?.data)) {
             response.data["chromegler"] = tools.checkIfChromegler(req, response.data);
 
-            if (response.data?.ip === config.owner_ip) {
+            if (response.data?.ip === process.env.OWNER_IP || "") {
                 response.data = config.owner_fake;
             }
-
 
             tools.registerPrometheusGeoMetrics(req, response.data);
             return res.json(response.data);

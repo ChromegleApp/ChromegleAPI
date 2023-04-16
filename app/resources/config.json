@@ -1,0 +1,14 @@
+{
+  "expire_chromegler": 300,
+  "owner_fake": {
+    "country": "Canada",
+    "country_code": "CA",
+    "region": "Ontario",
+    "ip": "Sorry, not this time!",
+    "accuracy": 420,
+    "timezone": "America/New_York",
+    "chromegler": false,
+    "owner": true
+  },
+  "owner_gif": "https://media.tenor.com/V6f-640jX7UAAAAC/tuxedo-cat-wave.gif"
+}

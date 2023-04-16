@@ -22,8 +22,10 @@ async function setChromegleUser(req) {
         return;
     }
 
+    let ip = req.headers["x-forwarded-for"]
+
     // Set chromegle status
-    req.app.usercache.set(`chromegle:users:${req.ip}`, "", config.expire_chromegler);
+    req.app.usercache.set(`chromegle:users:${ip}`, "", config.expire_chromegler);
 
 }
 

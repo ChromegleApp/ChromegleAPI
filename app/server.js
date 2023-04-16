@@ -11,7 +11,7 @@ const tools = require("./modules/tools");
 const NodeCache = require("node-cache");
 const ChromegleStatistics = require("./modules/stats");
 
-// Use X-Forwarded-For IP for rate limiting
+// Use x-forwarded-for IP for rate limiting
 app.enable("trust proxy");
 app.use(require("cors")());
 app.use(express.json());
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
     res.on(
         "finish",
-        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.ip, req.originalUrl)
+        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.headers['x-forwarded-for'], req.originalUrl)
     );
 
     next();
