@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const tools = require("../modules/tools.js");
 const rateLimit = require("express-rate-limit");
-const tips = require("../resources/tips.json")
 const axios = require("axios");
 const net = require("net");
 const config = require('../resources/config.json');
@@ -15,7 +14,7 @@ router.get("/metrics", async (req, res) => {
 });
 
 router.get("/tips", async (req, res) => {
-    return res.json(tips);
+    return res.json(config.tips);
 });
 
 
