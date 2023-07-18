@@ -27,15 +27,17 @@ router.post("/", (req, res) => {
         return res.status(400).json({status: 400, message: 'Must include a target'});
     }
 
+    let uuid = crypto.randomUUID();
+
     // Add broadcast
     router.broadcasts.push({
-        id: crypto.randomUUID(),
+        id: uuid,
         message: req.body.message,
         expires: getTimestamp() + router.expireAfter,
         target: req.body.target
-    })
+    });
 
-    return res.status(200).json({status: 200});
+    return res.status(200).json({status: 200, id: uuid});
 
 });
 

@@ -14,7 +14,7 @@ RUN         npm install
 
 ENV         IS_DOCKER YES
 
-FROM        BASE
+FROM        BASE as FINAL
 
 WORKDIR     ./
 
