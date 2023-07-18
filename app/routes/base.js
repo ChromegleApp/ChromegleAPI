@@ -61,8 +61,4 @@ router.get("/geolocate", geoRateLimitMinute, async (req, res) => {
 
 });
 
-
-
-
-
 module.exports = router;

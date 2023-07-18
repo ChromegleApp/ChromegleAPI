@@ -6,6 +6,7 @@ const PORT = process.env.PORT || "3000";
 const usersRoute = require("./routes/users");
 const baseRoute = require("./routes/base");
 const omegleRoute = require("./routes/omegle");
+const broadcastRoute = require("./routes/broadcast");
 const Logger = require("./modules/logger");
 const tools = require("./modules/tools");
 const NodeCache = require("node-cache");
@@ -37,7 +38,7 @@ app.use((req, res, next) => {
 
     res.on(
         "finish",
-        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.headers['x-forwarded-for'], req.originalUrl)
+        () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.headers['x-forwarded-for'] || req.ip, req.originalUrl)
     );
 
     next();
@@ -48,6 +49,8 @@ app.use((req, res, next) => {
 app.use("/", baseRoute);
 app.use("/users", usersRoute);
 app.use("/omegle", omegleRoute);
+app.use("/broadcasts", broadcastRoute);
+
 app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 
 server.listen(PORT, async () => {

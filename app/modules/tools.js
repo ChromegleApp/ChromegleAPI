@@ -59,7 +59,7 @@ function registerPrometheusGeoMetrics(req, payload) {
 }
 
 async function registerPrometheusOmegleMetrics(app) {
-    let users = ((await getOmegleStats(app?.gencache))?.count) || 0;
+    let users = ((await getOmegleStats(app?.usercache))?.count) || 0;
     app.metrics.setOmegleCount(users);
 }
 
