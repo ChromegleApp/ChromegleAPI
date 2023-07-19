@@ -1,12 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require('crypto');
+const {isNumeric} = require("../modules/tools");
 
 router.broadcasts = [];
-router.expireAfter = 15 * 60 * 1000;
+router.defaultExpireAfter = 15 * 60;
+router.maxExpiresAfter = 60 * 60 * 12;
+router.expireTask = setInterval(expireBroadcasts, 10 * 1000);
 
 function getTimestamp() {
     return Math.floor(Date.now() / 1000);
+}
+
+function getExpireTime(req) {
+
+    if (isNumeric(req?.body?.duration)) {
+        return Math.max(0, Math.min(parseInt(req.body.duration), router.maxExpiresAfter));
+    }
+
+    return router.defaultExpireAfter;
+
 }
 
 router.post("/", (req, res) => {
@@ -28,16 +41,17 @@ router.post("/", (req, res) => {
     }
 
     let uuid = crypto.randomUUID();
+    let expires = getTimestamp() + getExpireTime(req);
 
     // Add broadcast
     router.broadcasts.push({
         id: uuid,
         message: req.body.message,
-        expires: getTimestamp() + router.expireAfter,
+        expires: expires,
         target: req.body.target
     });
 
-    return res.status(200).json({status: 200, id: uuid});
+    return res.status(200).json({status: 200, id: uuid, expires: expires});
 
 });
 
@@ -60,9 +74,6 @@ function expireBroadcasts() {
 }
 
 router.get("/", (req, res) => {
-
-    // Update broadcasts
-    expireBroadcasts();
 
     return res.status(200).json({
         broadcasts: router.broadcasts,
