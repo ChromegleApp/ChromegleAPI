@@ -35,6 +35,7 @@ app.options("*", (req, res) => {
  * Logger Requests
  */
 app.use((req, res, next) => {
+    app.metrics.insertApiRequest();
 
     res.on(
         "finish",

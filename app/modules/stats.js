@@ -22,6 +22,14 @@ class ChromegleStatistics {
                 }
             )
         },
+        "api_request_count": {
+            "object": new Counter(
+                {
+                    name: `${this.prefix}_api_request_count`,
+                    help: "Number of requests made to the API as a whole",
+                }
+            )
+        },
         "omegle_count": {
             "object": new Gauge(
                 {
@@ -30,7 +38,6 @@ class ChromegleStatistics {
                 }
             )
         }
-
     }
 
     constructor() {
@@ -56,6 +63,10 @@ class ChromegleStatistics {
 
     insertGeolocationRequest(labelData) {
         this.metrics?.geolocation_request_count?.object.labels(labelData).inc(1);
+    }
+
+    insertApiRequest() {
+        this.metrics?.api_request_count?.object?.inc(1);
     }
 
 }
