@@ -5,11 +5,11 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const PORT = process.env.PORT || "3000";
-const Logger = require("./core/modules/logger.module");
+const Logger = require("./src/modules/logger.module");
 const NodeCache = require("node-cache");
-const ChromegleStatistics = require("./core/modules/prometheus.module");
-const {setChromegleUser} = require("./core/tools/chromegle.tools");
-const {registerPrometheusOmegleMetrics} = require("./core/modules/general.module");
+const ChromegleStatistics = require("./src/modules/prometheus.module");
+const {setChromegleUser} = require("./src/tools/chromegle.tools");
+const {registerPrometheusOmegleMetrics} = require("./src/modules/general.module");
 
 // Use x-forwarded-for IP for rate limiting
 app.enable("trust proxy");
@@ -56,10 +56,10 @@ app.use((req, res, next) => {
  * Register routes
  */
 {
-    app.use("/", require("./core/routes/home.route"));
-    app.use("/users", require("./core/routes/users.route"));
-    app.use("/omegle", require("./core/routes/omegle.route"));
-    app.use("/broadcasts", require("./core/routes/broadcast.route"));
+    app.use("/", require("./src/routes/home.route"));
+    app.use("/users", require("./src/routes/users.route"));
+    app.use("/omegle", require("./src/routes/omegle.route"));
+    app.use("/broadcasts", require("./src/routes/broadcast.route"));
     app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
 }
 
