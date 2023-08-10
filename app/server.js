@@ -32,11 +32,17 @@ app.options("*", (req, res) => {
 });
 
 /**
- * Logger Requests
+ * Log Requests
  */
 app.use((req, res, next) => {
+
+    // Whoever called the API is online
+    tools.setChromegleUser(req).then(() => null).catch(() => null);
+
+    // Track the request
     app.metrics.insertApiRequest();
 
+    // Log the request
     res.on(
         "finish",
         () => Logger.INFO("%s - \"REQUEST %s\"", res.statusCode, req.headers['x-forwarded-for'] || req.ip, req.originalUrl)

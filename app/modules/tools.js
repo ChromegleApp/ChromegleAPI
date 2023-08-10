@@ -1,5 +1,6 @@
 const axios = require("axios");
 const config = require("../resources/config.json");
+const {add} = require("nodemon/lib/rules");
 
 function generateRequestURL() {
     return `https://front38.omegle.com/status?nocache=${Math.random()}&randid=${(Math.random() + 1).toString(36).substring(7)}`
@@ -15,6 +16,13 @@ function validGeoResponse(data) {
     }
 }
 
+/**
+ * Used to clean Ipv6 addresses before storing them, since : is our delimiter
+ */
+function cleanAddress(address) {
+    return address.replaceAll(":", ".");
+}
+
 async function setChromegleUser(req) {
 
     // Check where the request comes from (Omegle = Chromegle)
@@ -22,7 +30,7 @@ async function setChromegleUser(req) {
         return;
     }
 
-    let ip = req.headers["x-forwarded-for"];
+    let ip = req.headers["x-forwarded-for"] || req.ip;
 
     // Validate IP
     if (ip == null) {
@@ -30,12 +38,14 @@ async function setChromegleUser(req) {
     }
 
     // Set chromegle status
-    req.app.usercache.set(`chromegle:users:${ip}`, "", config.expire_chromegler);
+    let cleanedIp = cleanAddress(ip);
+    req.app.usercache.set(`chromegle:users:${cleanedIp}`, "", config.expire_chromegler || 300);
 
 }
 
 function checkIfChromegler(req, data) {
-    return req.app.usercache.has(`chromegle:users:${data.ip}`);
+    let cleanedIp = cleanAddress(data.ip);
+    return req.app.usercache.has(`chromegle:users:${cleanedIp}`);
 }
 
 /**

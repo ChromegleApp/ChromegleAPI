@@ -27,9 +27,6 @@ const geoRateLimitMinute = rateLimit({
 
 router.get("/geolocate", geoRateLimitMinute, async (req, res) => {
 
-    // Make them a Chromegle user (async)
-    tools.setChromegleUser(req).then(() => null).catch(() => null);
-
     // Check if a valid IP is provided
     if (!net.isIP(req?.query?.address)) {
         res.status(400).send({ error: "Invalid or missing IP Address" });
