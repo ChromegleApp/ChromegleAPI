@@ -19,8 +19,9 @@ function validGeoResponse(data) {
 /**
  * Used to clean Ipv6 addresses before storing them, since : is our delimiter
  */
-function cleanAddress(address) {
-    return address.replaceAll(":", ".");
+function getCacheString(address) {
+    let cleanedAddress = address.replaceAll(":", "."); // Remove ":", it is our delimiter
+    return "chromegle:users:" + cleanedAddress;
 }
 
 async function setChromegleUser(req) {
@@ -32,20 +33,24 @@ async function setChromegleUser(req) {
 
     let ip = req.headers["x-forwarded-for"] || req.ip;
 
-    // Validate IP
+    // Validate IP exists
     if (ip == null) {
         return;
     }
 
     // Set chromegle status
-    let cleanedIp = cleanAddress(ip);
-    req.app.usercache.set(`chromegle:users:${cleanedIp}`, "", config.expire_chromegler || 300);
+    req.app.usercache.set(`chromegle:users:${getCacheString(ip)}`, "", config.expire_chromegler || 300);
 
 }
 
 function checkIfChromegler(req, data) {
-    let cleanedIp = cleanAddress(data.ip);
-    return req.app.usercache.has(`chromegle:users:${cleanedIp}`);
+
+    // Validate IP exists
+    if (data?.ip == null) {
+        return false;
+    }
+
+    return req.app.usercache.has(`chromegle:users:${getCacheString(data.ip)}`);
 }
 
 /**
