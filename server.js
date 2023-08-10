@@ -1,16 +1,15 @@
+// noinspection JSCheckFunctionSignatures
+
 const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const PORT = process.env.PORT || "3000";
-const usersRoute = require("./routes/users");
-const baseRoute = require("./routes/base");
-const omegleRoute = require("./routes/omegle");
-const broadcastRoute = require("./routes/broadcast");
-const Logger = require("./modules/logger");
-const tools = require("./modules/tools");
+const Logger = require("./core/modules/logger.module");
 const NodeCache = require("node-cache");
-const ChromegleStatistics = require("./modules/stats");
+const ChromegleStatistics = require("./core/modules/prometheus.module");
+const {setChromegleUser} = require("./core/tools/chromegle.tools");
+const {registerPrometheusOmegleMetrics} = require("./core/modules/general.module");
 
 // Use x-forwarded-for IP for rate limiting
 app.enable("trust proxy");
@@ -37,7 +36,7 @@ app.options("*", (req, res) => {
 app.use((req, res, next) => {
 
     // Whoever called the API is online
-    tools.setChromegleUser(req).then(() => null).catch(() => null);
+    setChromegleUser(req);
 
     // Track the request
     app.metrics.insertApiRequest();
@@ -53,18 +52,22 @@ app.use((req, res, next) => {
 });
 
 
-app.use("/", baseRoute);
-app.use("/users", usersRoute);
-app.use("/omegle", omegleRoute);
-app.use("/broadcasts", broadcastRoute);
-
-app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
+/**
+ * Register routes
+ */
+{
+    app.use("/", require("./core/routes/home.route"));
+    app.use("/users", require("./core/routes/users.route"));
+    app.use("/omegle", require("./core/routes/omegle.route"));
+    app.use("/broadcasts", require("./core/routes/broadcast.route"));
+    app.all('*', (_, res) => res.redirect("https://chromegle.net/"));
+}
 
 server.listen(PORT, async () => {
     Logger.INFO(`Listening on port ${PORT} for connections!`);
 
     // Register Prometheus Omegle Metrics
-    setInterval(async () => await tools.registerPrometheusOmegleMetrics(app), 60 * 1000);
-    await tools.registerPrometheusOmegleMetrics(app);
+    setInterval(async () => await registerPrometheusOmegleMetrics(app), 60 * 1000);
+    await registerPrometheusOmegleMetrics(app);
 
 });

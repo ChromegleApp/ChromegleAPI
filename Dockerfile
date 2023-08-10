@@ -8,7 +8,7 @@ RUN         apt update \
             tzdata zip tar curl build-essential libtool unixodbc libgssapi-krb5-2
 
 # Libraries
-COPY        ./app/package.json ./
+COPY        package.json ./
 
 RUN         npm install
 
