@@ -16,8 +16,14 @@ ENV         IS_DOCKER YES
 
 FROM        BASE as FINAL
 
+# Set workdir
 WORKDIR     ./
 
-COPY        ./app ./
+# Copy code
+COPY        ./src ./src
 
-CMD         ["node", "./server.js"]
+# Copy files
+COPY        ./resources ./resources
+
+# Start server
+CMD         ["node", "./src/server.js"]
