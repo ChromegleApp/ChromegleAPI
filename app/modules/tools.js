@@ -17,12 +17,12 @@ function validGeoResponse(data) {
 
 async function setChromegleUser(req) {
 
-    // Check if declared as a chromegler
-    if (!(req.query?.chromegler === "true")) {
+    // Check where the request comes from (Omegle = Chromegle)
+    if (!req?.headers?.origin?.includes("omegle.com")) {
         return;
     }
 
-    let ip = req.headers["x-forwarded-for"]
+    let ip = req.headers["x-forwarded-for"] || req.ip;
 
     // Set chromegle status
     req.app.usercache.set(`chromegle:users:${ip}`, "", config.expire_chromegler);
