@@ -36,7 +36,7 @@ async function geolocate(request, response) {
     }
 
     // Check if user is a Chromegler
-    cleanedResult.chromegler = false // checkIfChromegleUser(cleanedResult.ip, request.app.usercache);
+    cleanedResult.chromegler = true // checkIfChromegleUser(cleanedResult.ip, request.app.usercache);
     cleanedResult = (cleanedResult.ip === process.env.OWNER_IP) ? config.owner_fake : cleanedResult;
 
     // Log the metrics
